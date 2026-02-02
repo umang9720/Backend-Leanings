@@ -1,21 +1,29 @@
 const express = require("express");
+const noteModel = require("./models/note.model");
+
+
 
 const app = express();
 app.use(express.json());
 
-const notes = [];
-
 // post api
-app.post("/notes", (req, res) => {
-  // console.log(req.body)
-  notes.push(req.body);
+app.post("/notes", async(req, res) => {
+ const data = req.body
+await noteModel.create({
+    title:data.title,
+    description:data.description,
+})
+
   res.status(201).json({
     message: "notes created sucesfully",
   });
 });
 
 // get api
-app.get("/notes", (req, res) => {
+app.get("/notes", async(req, res) => {
+
+const notes = await noteModel.find()
+
   res.status(200).json({
     message: "notes fetched sucesfully",
     notes: notes,
@@ -23,24 +31,28 @@ app.get("/notes", (req, res) => {
 });
 
 // delete api
-app.delete("/notes/:index", (req, res) => {
-  const index = req.params.index;
-  //   console.log(index);
+app.delete("/notes/:id", async(req, res) => {
+  const id = req.params.id;
 
-  delete notes[index];
+  await noteModel.findOneAndDelete({
+    _id :id
+  })
 
   res.status(200).json({
     message: "notes deleted sucesfully",
   });
 });
 
-// delete api
-app.patch("/notes/:index", (req, res) => {
-  const index = req.params.index;
+// patch api
+app.patch("/notes/:id", async(req, res) => {
+  const id = req.params.id;
   const description = req.body.description;
-  console.log(description);
 
-  notes[index].description = description;
+ await noteModel.findByIdAndUpdate({
+    _id :id
+ },{
+    description:description
+ })
 
   res.status(200).json({
     message: "notes updated sucesfully",
